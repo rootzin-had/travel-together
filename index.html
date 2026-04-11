@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Together</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ========== LANDING ========== -->
+<div id="landing">
+  <div class="land-title">Travel Together</div>
+  <p class="land-sub">Plan, book, and explore together.</p>
+
+  <div class="role-cards">  
+    <div class="role-card" onclick="selectRole('coordinator')">
+      <div class="icon">🗺️</div>
+      <div class="name">Coordinator</div>
+    </div>
+
+    <div class="role-card" onclick="selectRole('user')">
+      <div class="icon">✈️</div>
+      <div class="name">Traveler</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== LOGIN ========== -->
+<div id="login-screen" style="display:none;">
+  
+  <!-- LOGIN BOX -->
+  <div id="login-box-wrap" class="login-box">
+    <div class="back-link" onclick="logout()">← Back</div>
+
+    <div class="login-title" id="login-role-title">Welcome</div>
+    <div class="login-sub" id="login-role-sub" onclick="doLogin()">Sign in</div>
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" id="login-email">
+    </div>
+
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" id="login-pass">
+    </div>
+
+    <button class="btn btn-primary" onclick="doLogin()">Login</button>
+    <button class="btn btn-secondary" onclick="registerBox()">Register</button>
+    
+    <!--<div id="register-link"></div>-->
+  </div>
+
+  <!-- REGISTER BOX -->
+  <div id="register-box-wrap" class="login-box" style="display:none;">
+    <div  class="back-link" onclick="logout()">← Back</div>
+
+    
+
+    <div class="form-row">
+      <label>Name</label>
+      <input type="text" id="reg-name">
+    </div>
+
+    <div class="form-row">
+      <label>Email</label>
+      <input type="email" id="reg-email">
+    </div>
+
+    <div class="form-row">
+      <label>Password</label>
+      <input type="password" id="reg-pass">
+    </div>
+
+    <button class="btn btn-primary" onclick="doRegister()">Register</button>
+  </div>
+
+</div>
+
+<!-- ========== APP ========== -->
+<div id="app" style="display:none;">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">✈ Travel Together</div>
+
+    <div class="header-right">
+      <span id="hdr-badge" class="role-badge"></span>
+      <span id="hdr-name" class="user-name"></span>
+      <button class=add-btn onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- MAIN SHELL -->
+  <div class="shell">
+    <nav id="sidebar"></nav>
+    <main id="main-content"></main>
+  </div>
+
+  
+
+</div>
+
+<div id="bookingModal" class="modall" style="display:none;">
+  <div class="modal-content">
+    <h3>Book Package</h3>
+
+    <label>No. of People:</label>
+    <input type="number" id="bookingPersons" min="1" value="1">
+
+    <br><br>
+
+    <label>Select Date:</label>
+    <input type="date" id="bookingDate">
+
+    <br><br>
+
+    <button onclick="confirmBooking()">Confirm</button>
+    <button onclick="closeBooking()">Cancel</button>
+  </div>
+</div>
+
+  <div id="content"></div>
+
+<script src="app.js" defer></script>
+
+</body>
+
+</html>
