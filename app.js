@@ -10,7 +10,6 @@ function getToken(req) {
 
 async function api(url, method = "GET", body = null) {
   const token = sessionStorage.getItem("token");
-
   //console.log("TOKEN SENT:", token); // debug
 
   const res = await fetch("http://localhost:3000" + url, {
@@ -21,13 +20,23 @@ async function api(url, method = "GET", body = null) {
     },
     body: body ? JSON.stringify(body) : null
   });
-
+const text = await res.text();
   if (!res.ok) {
     console.log("API ERROR:", res.status);
     throw new Error("API error");
   }
 
-  return res.json();
+  if (!text) {
+  console.log("⚠️ EMPTY RESPONSE");
+  return [];
+}
+
+try {
+  return JSON.parse(text);
+} catch (e) {
+  console.log("❌ INVALID JSON:", text);
+  throw new Error("Invalid JSON from server");
+}
 }
 
 let currentRole = null;
@@ -35,11 +44,13 @@ let currentUser = null;
 let currentSection = null;
 let selectedPackageId = null;
 
+
 function selectRole(role) {
   currentRole = role;
 
 
   document.getElementById('landing').style.display = 'none';
+  document.getElementById('landing2').style.display = 'none';
   document.getElementById('login-screen').style.display = 'flex';
 
   const titles = {
@@ -115,9 +126,6 @@ async function doLogin() {
   }
 }
 
-
-
-
 async function registerBox(){
   document.getElementById('register-box-wrap').style.display = 'block';
   document.getElementById('login-box-wrap').style.display = 'none';
@@ -187,11 +195,14 @@ const navConfig = {
   coordinator: [
     { id: 'coord-packages', label: 'My Packages' },
     { id: 'coord-pending', label: 'Pending Packages' },
-    { id: 'coord-confirmed', label: 'Confirmed Packages' }
+    { id: 'coord-confirmed', label: 'Confirmed Packages' },
+    {id: 'group-chats', label: 'Group Chats'}
   ],
   user: [
     { id: 'user-packages', label: 'Browse Packages' },
-    { id: 'user-bookings', label: 'My Bookings' }
+    { id: 'user-bookings', label: 'My Bookings' },
+    {id: 'group-chats', label: 'Group Chats'},
+    {id: 'personal-chats', label: 'Personal Chats'}
   ],
 };
 
@@ -219,13 +230,108 @@ async function renderSection(id) {
     if (id === 'admin-packages') html = await renderAdminPackages();
     if (id === 'admin-coordinators') html = await renderAdminCoordinators();
     if (id === 'admin-dashboard') html = await renderAdminDashboard();
-
+    if (id === 'group-chats') html = await renderGroup();
+    if (id === 'personal-chats') html = await renderDM();
     main.innerHTML = html;
 
   } catch (err) {
     notify(err.message, "❌");
   }
 }
+
+async function renderGroup() {
+  return `
+  <div class="chat-packages">
+
+  <div class="chat-card">
+    <div class="chat-title">Goa Package</div>
+    <a href="https://chat.whatsapp.com/H2xA4SKPz88KFcwXtSsEBF" target="_blank" class="chat-btn">
+      <i class="fa-brands fa-whatsapp"></i> Join Group
+    </a>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-title">Kashmir Package</div>
+    <a href="https://chat.whatsapp.com/HKt0BwninJG4XdJ3gHb446" target="_blank" class="chat-btn">
+      <i class="fa-brands fa-whatsapp"></i> Join Group
+    </a>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-title">Kochi Package</div>
+    <a href="https://chat.whatsapp.com/FwBwrQTXYXc1cbk1TY75Di" target="_blank" class="chat-btn">
+      <i class="fa-brands fa-whatsapp"></i> Join Group
+    </a>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-title">Agra Package</div>
+    <a href="https://chat.whatsapp.com/Kur2gV9YCb48KQxl5nvV23" target="_blank" class="chat-btn">
+      <i class="fa-brands fa-whatsapp"></i> Join Group
+    </a>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-title">Lakshadweep Package</div>
+    <a href="https://chat.whatsapp.com/JSGXlMnxctw4onpcin3F0X" target="_blank" class="chat-btn">
+      <i class="fa-brands fa-whatsapp"></i> Join Group
+    </a>
+  </div>
+
+</div>
+  
+  
+  `
+}
+
+async function renderDM() {
+  return `
+  <h2>Coordinators</h2>
+
+<div class="coord-card">
+  <div class="coord-name">Alan</div>
+
+  <a href="https://wa.me/919633879383?text=Hi%20Alan,%20I'm%20interested%20in%20your%20travel%20packages"
+     target="_blank"
+     class="chat-btn">
+    <i class="fa-brands fa-whatsapp"></i> Message Now
+  </a>
+</div>
+
+<div class="coord-card">
+  <div class="coord-name">Ajin</div>
+
+  <a href="https://wa.me/919633879383?text=Hi%20Ajin,%20I'm%20interested%20in%20your%20travel%20packages"
+     target="_blank"
+     class="chat-btn">
+    <i class="fa-brands fa-whatsapp"></i> Message Now
+  </a>
+</div>
+
+<div class="coord-card">
+  <div class="coord-name">Vinayak</div>
+
+  <a href="https://wa.me/919633879383?text=Hi%20Vinayak,%20I'm%20interested%20in%20your%20travel%20packages"
+     target="_blank"
+     class="chat-btn">
+    <i class="fa-brands fa-whatsapp"></i> Message Now
+  </a>
+</div>
+
+<div class="coord-card">
+  <div class="coord-name">Hashir</div>
+
+  <a href="https://wa.me/919633879383?text=Hi%20Hashir,%20I'm%20interested%20in%20your%20travel%20packages"
+     target="_blank"
+     class="chat-btn">
+    <i class="fa-brands fa-whatsapp"></i> Message Now
+  </a>
+</div>
+  `
+}
+
+
+
 
 // ================= USER =================
 
@@ -287,16 +393,19 @@ async function confirmBooking() {
 }
 async function renderUserBookings() {
   const bookings = await api('/bookings');
-
+  
   return `
     <h2>My Bookings</h2>
-    ${bookings.map(b => `
+    ${bookings.map(b => {
+      const Bookdate = new Date(b.booking_date).toLocaleDateString();
+      return `
       <div class="card">
         <div>Package ID: ${b.package_id}</div>
         <div>Persons: ${b.persons}</div>
         <div>Status: ${b.status}</div>
+        <div>Date: ${Bookdate}</div>
       </div>
-    `).join('')}
+    `}).join('')}
   `;
 }
 
@@ -476,6 +585,7 @@ async function deletePkg(id) {
 }
 
 
+
 // ================= ADMIN =================
 
 async function renderAdminPackages() {
@@ -532,6 +642,10 @@ async function renderAdminDashboard() {
   `;
 }
 
+
+
+
+
 // ================= COMMON =================
 
 async function bookPkg(id) {
@@ -559,6 +673,7 @@ window.onload = () => {
     currentRole = currentUser.role;
 
     document.getElementById('landing').style.display = 'none';
+    document.getElementById('landing2').style.display = 'none';
     launchApp();
 
     // 🔥 ADD THIS PART
@@ -567,7 +682,9 @@ window.onload = () => {
     } else if (currentRole === 'coordinator') {
       renderSection('coord-packages');
     } else {
-      renderSection('packages');
+      renderSection('user-packages');
     }
   }
 };
+
+
