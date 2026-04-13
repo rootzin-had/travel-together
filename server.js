@@ -135,13 +135,14 @@ app.get('/packages', verifyToken, (req, res) => {
   let params = [];
 
   if (req.user.role === 'admin') {
-    // ✅ Admin → show all with coordinator name
+    // ✅ Admin → all packages
     sql = `
       SELECT p.*, u.name AS coordinator_name
       FROM packages p
       JOIN users u ON p.coordinator_id = u.id
     `;
-  } else {
+
+  } else if (req.user.role === 'coordinator') {
     // ✅ Coordinator → only their packages
     sql = `
       SELECT p.*, u.name AS coordinator_name
@@ -150,6 +151,14 @@ app.get('/packages', verifyToken, (req, res) => {
       WHERE p.coordinator_id = ?
     `;
     params = [req.user.id];
+
+  } else {
+    // ✅ User → ALL packages (no restriction)
+    sql = `
+      SELECT p.*, u.name AS coordinator_name
+      FROM packages p
+      JOIN users u ON p.coordinator_id = u.id
+    `;
   }
 
   db.query(sql, params, (err, result) => {
@@ -284,6 +293,89 @@ app.put('/bookings/:id/status', verifyToken, (req, res) => {
 });
 
 
+// ===== CHAT =====
+
+// Create personal chat
+app.post('/chat/create-personal', verifyToken, (req, res) => {
+  const { user1, user2 } = req.body;
+
+  // 🔍 STEP 1: check if chat already exists
+  db.query(`
+    SELECT c.id
+    FROM chats c
+    JOIN chat_members m1 ON c.id = m1.chat_id
+    JOIN chat_members m2 ON c.id = m2.chat_id
+    WHERE c.is_group = false
+      AND m1.user_id = ?
+      AND m2.user_id = ?
+  `, [user1, user2], (err, results) => {
+
+    if (err) return res.status(500).json(err);
+
+    // ✅ CHAT ALREADY EXISTS
+    if (results.length > 0) {
+      return res.json({ chatId: results[0].id });
+    }
+
+    // 🆕 CREATE NEW CHAT
+    db.query("INSERT INTO chats (is_group) VALUES (false)", (err2, result) => {
+      if (err2) return res.status(500).json(err2);
+
+      const chatId = result.insertId;
+
+      db.query(
+        "INSERT INTO chat_members (chat_id, user_id) VALUES (?, ?), (?, ?)",
+        [chatId, user1, chatId, user2],
+        (err3) => {
+          if (err3) return res.status(500).json(err3);
+
+          res.json({ chatId });
+        }
+      );
+    });
+  });
+});
+
+// Get user chats
+app.get('/chat/my-chats/:userId', verifyToken, (req, res) => {
+  console.log("✅ CHAT ROUTE HIT");
+
+  const userId = req.params.userId;
+
+  db.query(`
+    SELECT c.*
+    FROM chats c
+    JOIN chat_members m ON c.id = m.chat_id
+    WHERE m.user_id = ?
+  `, [userId], (err, results) => {
+
+    if (err) {
+      console.log("❌ DB ERROR:", err);
+      return res.status(500).json({ error: "DB error" });
+    }
+
+    //console.log("📦 RESULT:", results);
+
+    return res.json(results || []);
+  });
+});
+
+// Get messages
+app.get('/chat/messages/:chatId', verifyToken, (req, res) => {
+  db.query(
+    "SELECT * FROM messages WHERE chat_id = ?",
+    [req.params.chatId],
+    (err, results) => {
+      res.json(results);
+    }
+  );
+});
+
+
+
+
+
+
 // ===== SAVED (WISHLIST) =====
 
 // Get saved
@@ -360,3 +452,4 @@ app.delete('/admin/delete-coordinator/:id', verifyToken, verifyAdmin, (req, res)
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });
+
